@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/png" sizes="50x50" href="{{url_for('static', filename='img/icon.png')}}">
+        <title>emotionCalculator</title>
+
+        <script>
+            var componentsProperties = {{ results|tojson|safe }};
+        </script>
+    </head>
+
+	<body onload="loadSliders()">
+        <header>
+            <h1 id="title">Emotion Calculator</h1>
+        </header>
+
+        <div id="componentsBoard"></div>
+
+        <div id="options">
+            <button id="instructionButton" onclick="showInstruction()">Instruction Manual</button>
+            <button id="PCAButton" onclick="switchToPCAComponents()">PCA Components</button>
+            <button id="submitButton" onclick="submit()">Submit</button>
+        </div>
+
+        <div id="output">
+
+            <div id="outputValues">
+
+                <div class="outputComponent">
+                    <div class="outputSliderDiv sliderDiv">
+                        <img src="{{url_for('static', filename='img/low_valence.png')}}" id="lowValenceEmoticon" class="low" alt="Low valence emoticon" >
+                        <img src="{{url_for('static', filename='img/high_valence.png')}}" id="highValenceEmoticon" class="high" alt="High valence emoticon" >
+                    </div>
+                    <label class="outputName target">Valence</label>
+                    <p><span class="output value"></span></p>
+                </div>
+
+                <div class="outputComponent">
+                    <div class="outputSliderDiv sliderDiv">
+                        <img src="{{url_for('static', filename='img/low_arousal.png')}}" id="lowArousalEmoticon" class="low" alt="Low arousal emoticon" >
+                        <img src="{{url_for('static', filename='img/high_arousal.png')}}" id="highArousalEmoticon" class="high" alt="High arousal emoticon" >
+                    </div>
+                    <label class="outputName target">Arousal</label>
+                    <p><span class="output value"></span></p>
+                </div>
+
+            </div>
+
+            <div id="outputEmotion">
+
+                <div id="nameDiv" class="emotionDiv">
+                    <p class="outputName">EMOTION:</p>
+                    <div id="emotionName"><p id="emotion" class="outputName"></p></div>
+                </div>
+
+                <div class="emotionDiv">
+                    <button id="other">OTHER FEATURES</button>
+                    <p class="details">Column importance on general and raw data.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    <script src="{{url_for('static', filename='js/slidersProperties.js')}}"></script>
+    <script src="{{url_for('static', filename='js/buttonsProperties.js')}}"></script>
+	</body>
+
+</html>
