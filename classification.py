@@ -10,6 +10,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.tree import DecisionTreeClassifier
+import seaborn as sns
+import matplotlib.pylab as plt
 
 data = read_csv('data/preprocessed.csv')
 data = data.drop(['timestamp', 'pid'], axis=1)
@@ -34,6 +36,36 @@ labels = model.predict(testing_data)
 accuracy = accuracy_score(ravel(testing_labels), ravel(labels))
 print("Random Forest accuracy: ", accuracy)
 # Accuracy: 0.9309834970905275
+
+# Get the predictions and labels for the "arousal" column
+arousal_predictions = labels[:,0]
+arousal_labels = testing_labels.iloc[:,0]
+
+# Print the confusion matrix for the "arousal" column
+arousal_conf_matrix = confusion_matrix(arousal_labels, arousal_predictions)
+
+# Plot the confusion matrix for the "arousal" column as a heatmap
+sns.heatmap(arousal_conf_matrix, annot=True, cmap='Blues', xticklabels=["1","2","3","4","5"], yticklabels=["1","2","3","4","5"])
+plt.show()
+
+# Get the predictions and labels for the "valence" column
+valence_predictions = labels[:,1]
+valence_labels = testing_labels.iloc[:,1]
+
+# Print the confusion matrix for the "valence" column
+valence_conf_matrix = confusion_matrix(valence_labels, valence_predictions)
+
+# Plot the confusion matrix for the "valence" column as a heatmap
+sns.heatmap(valence_conf_matrix, annot=True, cmap='Blues', xticklabels=["1","2","3","4","5"], yticklabels=["1","2","3","4","5"])
+plt.show()
+
+# Print the classification report for the "arousal" column
+print("Arousal classification report:")
+print(classification_report(arousal_labels, arousal_predictions, target_names=["1","2","3","4","5"]))
+
+# Print the classification report for the "valence" column
+print("Valence classification report:")
+print(classification_report(valence_labels, valence_predictions, target_names=["1","2","3","4","5"]))
 
 # ************ DECISION TREE ************
 # Build the model
@@ -79,6 +111,11 @@ print("Naive Bayes accuracy: ", accuracy)
 
 
 # ***************************** PCA *****************************
+# Print the correlation matrix
+corr = data.corr()
+(sns.heatmap(corr, annot=True))
+plt.show()
+
 # THIS FUNCTION SEPARATES INDIVIDUAL SENSOR COLUMNS AND ALSO SCALES THE DATA
 def separate_sensor_columns(dataset, sensor_name):
     # E4 bracelet is multi-sensor: it measures three-axis acceleration, photoplethysmography from which it also derives
