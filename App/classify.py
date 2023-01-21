@@ -1,12 +1,16 @@
+import time
 import numpy as np
 import pandas as pd
 import shap
 from matplotlib import pyplot as plt
+from matplotlib import use as matplotlib_use
 from pandas import read_csv
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+path = ''
 
 data = read_csv('data/preprocessed.csv')
 data = data.drop(['timestamp', 'pid'], axis=1)
@@ -100,7 +104,6 @@ PCA_model = RandomForestClassifier(n_estimators=100)
 
 PCA_model.fit(PCA_training_data, PCA_training_labels)
 
-
 # ************ GENERAL FEATURE IMPORTANCE ************
 # Get the feature importances from the model
 importances = model.feature_importances_
@@ -112,13 +115,14 @@ indices = np.argsort(importances)[::-1]
 names = [X.columns[i] for i in indices]
 
 # Create a bar plot of the feature importances
+plt.figure()
 plt.bar(range(X.shape[1]), importances[indices])
 
 # Add feature names as x-axis labels
 plt.xticks(range(X.shape[1]), names, rotation=90)
 
 # Save the plot to an image file
-plt.savefig('emotion_calculator_app/static/img/generalFI.png')
+plt.savefig('static/img/generalFI.png')
 
 # ************ GENERAL FEATURE IMPORTANCE (PCA) ************
 # Get the feature importances from the model
@@ -131,71 +135,14 @@ indices = np.argsort(importances)[::-1]
 names = [PCA_X.columns[i] for i in indices]
 
 # Create a bar plot of the first 6 feature importances
+plt.figure()
 plt.bar(range(6), importances[indices][:6])
 
 # Add feature names as x-axis labels
 plt.xticks(range(6), names[:6], rotation=90)
 
 # Save the plot to an image file
-plt.savefig('emotion_calculator_app/static/img/PCAFI.png')
-
-
-# ************ ROW FEATURE IMPORTANCE ************
-# Choose an input row to explain
-row_to_explain = testing_data.iloc[0, :]
-
-# Explain the prediction for the "arousal" target column using SHAP
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(row_to_explain)
-
-# Explain the prediction for the "valence" target column using SHAP
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(row_to_explain)
-
-# Create a bar plot of the SHAP feature importances for both target columns
-importances_arousal = shap_values[0]
-importances_valence = shap_values[1]
-features = X.columns
-
-fig, ax = plt.subplots()
-ax.barh(features, importances_arousal, label="Arousal")
-ax.barh(features, importances_valence, label="Valence")
-
-plt.title("SHAP Feature Importances for 'arousal' and 'valence' Targets")
-plt.ylabel("Feature")
-plt.xlabel("Importance")
-plt.legend()
-
-# Save the plot to an image file
-plt.savefig('emotion_calculator_app/static/img/generalRowFI.png')
-
-
-# ************ ROW FEATURE IMPORTANCE (PCA) ************
-# Choose an input row to explain
-row_to_explain = PCA_testing_data.iloc[0, :]
-
-# Explain the prediction for the "arousal" target column using SHAP
-explainer = shap.TreeExplainer(PCA_model)
-shap_values = explainer.shap_values(row_to_explain)
-
-# Explain the prediction for the "valence" target column using SHAP
-explainer = shap.TreeExplainer(PCA_model)
-shap_values = explainer.shap_values(row_to_explain)
-
-# Create a bar plot of the SHAP feature importances for both target columns
-importances_arousal = shap_values[0]
-importances_valence = shap_values[1]
-features = PCA_X.columns
-
-fig, ax = plt.subplots()
-ax.barh(features, importances_arousal, label="Arousal")
-ax.barh(features, importances_valence, label="Valence")
-
-plt.title("SHAP Feature Importances for 'arousal' and 'valence' Targets")
-plt.ylabel("Feature")
-plt.xlabel("Importance")
-plt.legend()
-plt.savefig('emotion_calculator_app/static/img/PCARowFI.png')
+plt.savefig('static/img/PCAFI.png')
 
 
 # **************************************** Functions **********************************************
@@ -225,25 +172,94 @@ def get_components_properties(type):
     return results
 
 
-def classify(test_set):
+def classify(set):
     # Convert the test dictionary into a 2D array-like object
-    test_data = pd.DataFrame([test_set])
+    data = pd.DataFrame([set])
 
     # Rearrange the columns of the test data to match the column order of the training data
-    test_data = test_data.reindex(columns=training_data.columns)
+    data = data.reindex(columns=training_data.columns)
 
-    labels = model.predict(test_data)
+    labels = model.predict(data)
 
     return labels
 
 
-def PCA_classify(test_set):
+def PCA_classify(set):
     # Convert the test dictionary into a 2D array-like object
-    test_data = pd.DataFrame([test_set])
+    data = pd.DataFrame([set])
 
     # Rearrange the columns of the test data to match the column order of the training data
-    test_data = test_data.reindex(columns=PCA_training_data.columns)
+    data = data.reindex(columns=PCA_training_data.columns)
 
-    labels = PCA_model.predict(test_data)
+    labels = PCA_model.predict(data)
 
     return labels
+
+
+def compute_row_feature_importance(mode, rows):
+    matplotlib_use('Agg')
+
+    if mode == "General":
+        rows = pd.Series(rows)
+        print(rows)
+
+        keys = ['E4_BVP', 'E4_EDA', 'E4_HR', 'E4_TEMP', 'x', 'y', 'z', 'Attention', 'delta', 'lowAlpha', 'highAlpha',
+                'lowBeta', 'highBeta', 'lowGamma', 'middleGamma', 'theta', 'Meditation']
+        rows = rows.reindex(keys)
+
+        # Explain the prediction for the "arousal" target column using SHAP
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(rows)
+
+        # Explain the prediction for the "valence" target column using SHAP
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(rows)
+
+        # Create a bar plot of the SHAP feature importances for both target columns
+        importances_arousal = shap_values[0]
+        importances_valence = shap_values[1]
+        features = X.columns
+
+        fig, ax = plt.subplots()
+        ax.barh(features, importances_arousal, label="Arousal")
+        ax.barh(features, importances_valence, label="Valence")
+
+        plt.title("SHAP Feature Importances for 'arousal' and 'valence' Targets")
+        plt.ylabel("Feature")
+        plt.xlabel("Importance")
+        plt.legend()
+
+        # Save the plot to an image file
+        plt.savefig('static/img/generalRowFI.png')
+
+    else:  # mode == "PCA"
+        rows = pd.Series(rows)
+
+        keys = ['E4_ACC', 'E4_Fotopletismography', 'E4_TEMP', 'E4_EDA', 'EEG', 'eSense']
+        rows = rows.reindex(keys)
+
+        # Explain the prediction for the "arousal" target column using SHAP
+        explainer = shap.TreeExplainer(PCA_model)
+        shap_values = explainer.shap_values(rows)
+
+        # Explain the prediction for the "valence" target column using SHAP
+        explainer = shap.TreeExplainer(PCA_model)
+        shap_values = explainer.shap_values(rows)
+
+        # Create a bar plot of the SHAP feature importances for both target columns
+        importances_arousal = shap_values[0]
+        importances_valence = shap_values[1]
+        features = PCA_X.columns
+
+        fig, ax = plt.subplots()
+        ax.barh(features, importances_arousal, label="Arousal")
+        ax.barh(features, importances_valence, label="Valence")
+
+        plt.title("SHAP Feature Importances for 'arousal' and 'valence' Targets")
+        plt.ylabel("Feature")
+        plt.xlabel("Importance")
+        plt.legend()
+
+        path = 'static/img/PCARowFI.png'
+
+        plt.savefig(path)
