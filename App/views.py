@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
-from classify import get_components_properties, classify, PCA_classify
+from classify import get_components_properties, classify, PCA_classify, compute_row_feature_importance
 
 views = Blueprint(__name__, "views")
 
@@ -19,11 +19,13 @@ def process_request():
     elif type == "General Submit":
         components_value = request.json["values"]
         result = classify(components_value)
+        compute_row_feature_importance("General", components_value)
         result = result.tolist()
     else: # type: "PCA Submit"
         components_value = request.json["values"]
         print(components_value)
         result = PCA_classify(components_value)
+        compute_row_feature_importance("PCA", components_value)
         result = result.tolist()
 
     return jsonify({"result": result})
