@@ -1,6 +1,10 @@
 # EmotionCalculator
 EmotionCalculator is a web application that allows the user to classify a specific emotion using the James Russel valence-arousal domain.
 
+![The Application working in PCA Components mode after a submit operation.](https://user-images.githubusercontent.com/112756894/213936360-2c614f04-b2da-48b9-a29f-24f3ca3caed9.png)
+
+*The Application working in PCA Components mode after a submit operation.*
+
 ## The idea and the dataset used
 The idea is to use for that purpose a set of data obtained from research conducted on 32 people while having a conversation on social issues. These people, of various genres, ages, and ethnicities, were equipped with sensors that allow us to know different biometric information such as heart rate and brain signals. The emotions they felt have been discussed at the end using a numeric rate with two integer values from 1 to 5: valence and arousal. These values can be used to identify the specific emotion in the valence-arousal domain: the James Russel model as mentioned before.
 
